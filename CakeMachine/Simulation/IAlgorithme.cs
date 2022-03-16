@@ -1,13 +1,16 @@
-﻿using CakeMachine.Fabrication.Elements;
-using CakeMachine.Fabrication.Opérations;
+﻿using CakeMachine.Fabrication;
+using CakeMachine.Fabrication.Elements;
 
 namespace CakeMachine.Simulation
 {
     internal interface IAlgorithme
     {
-        bool IsAsync { get; }
+        bool SupportsAsync { get; }
+        bool SupportsSync { get; }
 
-        IEnumerable<GâteauEmballé> Produire(int nombreGâteaux, Préparation postePréparation, Cuisson posteCuisson, Emballage posteEmballage);
-        IAsyncEnumerable<GâteauEmballé> ProduireAsync(int nombreGâteaux, Préparation postePréparation, Cuisson posteCuisson, Emballage posteEmballage);
+        virtual void ConfigurerUsine(IConfigurationUsine builder) { }
+
+        IEnumerable<GâteauEmballé> Produire(int nombreGâteaux, Usine usine);
+        IAsyncEnumerable<GâteauEmballé> ProduireAsync(int nombreGâteaux, Usine usine);
     }
 }

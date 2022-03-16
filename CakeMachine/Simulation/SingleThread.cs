@@ -1,36 +1,33 @@
-﻿using CakeMachine.Fabrication.Elements;
-using CakeMachine.Fabrication.Opérations;
+﻿using CakeMachine.Fabrication;
+using CakeMachine.Fabrication.Elements;
 
 namespace CakeMachine.Simulation
 {
     internal class SingleThread : IAlgorithme
     {
         /// <inheritdoc />
-        public bool IsAsync => false;
+        public bool SupportsAsync => false;
 
         /// <inheritdoc />
-        public IEnumerable<GâteauEmballé> Produire(int nombreGâteaux, 
-            Préparation postePréparation, 
-            Cuisson posteCuisson,
-            Emballage posteEmballage)
+        public bool SupportsSync => true;
+
+        /// <inheritdoc />
+        public IEnumerable<GâteauEmballé> Produire(int nombreGâteaux, Usine usine)
         {
             for (var i = 0; i < nombreGâteaux; i++)
             {
                 var plat = new Plat();
 
-                var gâteauCru = postePréparation.Préparer(plat);
-                var gâteauCuit = posteCuisson.Cuire(gâteauCru).Single();
-                var gâteauEmballé = posteEmballage.Emballer(gâteauCuit);
+                var gâteauCru = usine.Préparateurs.First().Préparer(plat);
+                var gâteauCuit = usine.Fours.First().Cuire(gâteauCru).Single();
+                var gâteauEmballé = usine.Emballeuses.First().Emballer(gâteauCuit);
 
                 yield return gâteauEmballé;
             }
         }
 
         /// <inheritdoc />
-        public IAsyncEnumerable<GâteauEmballé> ProduireAsync(int nombreGâteaux, 
-            Préparation postePréparation, 
-            Cuisson posteCuisson,
-            Emballage posteEmballage)
+        public IAsyncEnumerable<GâteauEmballé> ProduireAsync(int nombreGâteaux, Usine usine)
         {
             throw new NotImplementedException();
         }

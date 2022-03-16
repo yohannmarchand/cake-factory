@@ -1,51 +1,66 @@
 ﻿using System.Diagnostics;
-using CakeMachine.Fabrication.Opérations;
-using CakeMachine.Fabrication.Paramètres;
+using CakeMachine.Fabrication;
 using CakeMachine.Simulation;
 using CakeMachine.Utils;
 
-const int nombreGâteaux = 10;
+const int nombreGâteaux = 100;
 var stopWatch = new Stopwatch();
-var rng = new ThreadSafeRandomNumberGenerator();
-
-var préparation = new Préparation(rng.Fork(),
-    new ParamètresPréparation(3, 0.05, TimeSpan.FromMilliseconds(5), TimeSpan.FromMilliseconds(8)));
-
-var cuisson = new Cuisson(rng.Fork(), new ParamètresCuisson(5, 0.05, TimeSpan.FromMilliseconds(10)));
-
-var emballage = new Emballage(rng.Fork(), new ParamètresEmballage(2, 0.05, TimeSpan.FromMilliseconds(2)));
 
 var algorithmes = new IAlgorithme[]
 {
     new SingleThread()
 };
 
-var résultats = algorithmes.ToDictionary(algorithme => algorithme, _ => TimeSpan.Zero);
+var résultats = algorithmes.ToDictionary(algorithme => algorithme, _ => new Dictionary<bool, TimeSpan>());
 
 foreach (var algorithme in algorithmes)
 {
-    stopWatch.Start();
+    var builder = new UsineBuilder();
+    algorithme.ConfigurerUsine(builder);
+    var usine = builder.Build();
 
-    var gâteauxConformes = 0;
-
-    while (gâteauxConformes < nombreGâteaux)
+    if(algorithme.SupportsSync)
     {
-        var gâteaux = algorithme.IsAsync
-            ? await algorithme.ProduireAsync(nombreGâteaux, préparation, cuisson, emballage).ToEnumerableAsync()
-            : algorithme.Produire(nombreGâteaux, préparation, cuisson, emballage);
+        stopWatch.Start();
 
-        gâteauxConformes += gâteaux.Count(gâteau => gâteau.EstConforme);
+        var gâteauxConformes = 0;
+
+        while (gâteauxConformes < nombreGâteaux)
+        {
+            var gâteaux = algorithme.Produire(nombreGâteaux, usine);
+            gâteauxConformes += gâteaux.Count(gâteau => gâteau.EstConforme);
+        }
+
+        stopWatch.Stop();
+
+        résultats[algorithme][false] = stopWatch.Elapsed;
+        stopWatch.Reset();
     }
 
-    stopWatch.Stop();
+    if (algorithme.SupportsAsync)
+    {
+        stopWatch.Start();
 
-    résultats[algorithme] = stopWatch.Elapsed;
-    stopWatch.Reset();
+        var gâteauxConformes = 0;
+
+        while (gâteauxConformes < nombreGâteaux)
+        {
+            var gâteaux = await algorithme.ProduireAsync(nombreGâteaux, usine).ToEnumerableAsync();
+            gâteauxConformes += gâteaux.Count(gâteau => gâteau.EstConforme);
+        }
+
+        stopWatch.Stop();
+
+        résultats[algorithme][true] = stopWatch.Elapsed;
+        stopWatch.Reset();
+    }
 }
 
-var résultatsOrdonnés = résultats.OrderBy(kv => kv.Value);
-
-foreach (var (algorithme, temps) in résultatsOrdonnés)
+foreach (var (algorithme, perfomances) in résultats)
 {
-    Console.WriteLine($"Avec l'algorithme {algorithme}, {temps.TotalSeconds:F}s se sont écoulés pour produire {nombreGâteaux} gâteaux");
+    if(perfomances.ContainsKey(false))
+        Console.WriteLine($"Avec l'algorithme {algorithme}[Sync], {perfomances[false].TotalSeconds:F}s se sont écoulés pour produire {nombreGâteaux} gâteaux");
+
+    if (perfomances.ContainsKey(true))
+        Console.WriteLine($"Avec l'algorithme {algorithme}[Async], {perfomances[true].TotalSeconds:F}s se sont écoulés pour produire {nombreGâteaux} gâteaux");
 }

@@ -21,7 +21,7 @@ namespace CakeMachine.Fabrication.Opérations
             _rng = rng;
         }
 
-        
+        public int PlacesRestantes => _lock.CurrentCount;
 
         public GâteauEmballé Emballer(GâteauCuit gâteau)
         {

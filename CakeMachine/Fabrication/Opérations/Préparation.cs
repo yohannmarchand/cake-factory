@@ -20,7 +20,9 @@ namespace CakeMachine.Fabrication.Opérations
             _defectRate = paramètres.DefectRate;
             _lock = new SemaphoreSlim(paramètres.NombrePlaces);
         }
-        
+
+        public int PlacesRestantes => _lock.CurrentCount;
+
         public GâteauCru Préparer(Plat plat)
         {
             _lock.Wait();
