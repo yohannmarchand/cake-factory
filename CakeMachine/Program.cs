@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using CakeMachine.Fabrication;
 using CakeMachine.Simulation;
 using CakeMachine.Utils;
@@ -6,10 +7,11 @@ using CakeMachine.Utils;
 const int nombreGâteaux = 100;
 var stopWatch = new Stopwatch();
 
-var algorithmes = new IAlgorithme[]
-{
-    new SingleThread()
-};
+var algorithmes = Assembly.GetExecutingAssembly().GetTypes()
+    .Where(type => type.BaseType == typeof(Algorithme))
+    .Select(Activator.CreateInstance)
+    .Cast<Algorithme>()
+    .ToArray();
 
 var résultats = algorithmes.ToDictionary(algorithme => algorithme, _ => new Dictionary<bool, TimeSpan>());
 

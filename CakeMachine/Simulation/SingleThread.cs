@@ -3,16 +3,16 @@ using CakeMachine.Fabrication.Elements;
 
 namespace CakeMachine.Simulation
 {
-    internal class SingleThread : IAlgorithme
+    internal class SingleThread : Algorithme
     {
         /// <inheritdoc />
-        public bool SupportsAsync => false;
+        public override bool SupportsAsync => false;
 
         /// <inheritdoc />
-        public bool SupportsSync => true;
+        public override bool SupportsSync => true;
 
         /// <inheritdoc />
-        public IEnumerable<GâteauEmballé> Produire(int nombreGâteaux, Usine usine)
+        public override IEnumerable<GâteauEmballé> Produire(int nombreGâteaux, Usine usine)
         {
             for (var i = 0; i < nombreGâteaux; i++)
             {
@@ -27,7 +27,7 @@ namespace CakeMachine.Simulation
         }
 
         /// <inheritdoc />
-        public IAsyncEnumerable<GâteauEmballé> ProduireAsync(int nombreGâteaux, Usine usine)
+        public override IAsyncEnumerable<GâteauEmballé> ProduireAsync(int nombreGâteaux, Usine usine)
         {
             throw new NotImplementedException();
         }
