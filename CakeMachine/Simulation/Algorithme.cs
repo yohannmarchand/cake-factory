@@ -5,12 +5,19 @@ namespace CakeMachine.Simulation
 {
     internal abstract class Algorithme
     {
-        public abstract bool SupportsAsync { get; }
-        public abstract bool SupportsSync { get; }
+        public virtual bool SupportsAsync => false;
+        public virtual bool SupportsSync => false;
 
         public virtual void ConfigurerUsine(IConfigurationUsine builder) { }
 
-        public abstract IEnumerable<GâteauEmballé> Produire(int nombreGâteaux, Usine usine);
-        public abstract IAsyncEnumerable<GâteauEmballé> ProduireAsync(int nombreGâteaux, Usine usine);
+        public virtual IEnumerable<GâteauEmballé> Produire(Usine usine, CancellationToken token)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual IAsyncEnumerable<GâteauEmballé> ProduireAsync(Usine usine, CancellationToken token)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

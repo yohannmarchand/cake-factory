@@ -6,15 +6,12 @@ namespace CakeMachine.Simulation
     internal class SingleThread : Algorithme
     {
         /// <inheritdoc />
-        public override bool SupportsAsync => false;
-
-        /// <inheritdoc />
         public override bool SupportsSync => true;
 
         /// <inheritdoc />
-        public override IEnumerable<GâteauEmballé> Produire(int nombreGâteaux, Usine usine)
+        public override IEnumerable<GâteauEmballé> Produire(Usine usine, CancellationToken token)
         {
-            for (var i = 0; i < nombreGâteaux; i++)
+            while (!token.IsCancellationRequested)
             {
                 var plat = new Plat();
 
@@ -24,12 +21,6 @@ namespace CakeMachine.Simulation
 
                 yield return gâteauEmballé;
             }
-        }
-
-        /// <inheritdoc />
-        public override IAsyncEnumerable<GâteauEmballé> ProduireAsync(int nombreGâteaux, Usine usine)
-        {
-            throw new NotImplementedException();
         }
     }
 }
