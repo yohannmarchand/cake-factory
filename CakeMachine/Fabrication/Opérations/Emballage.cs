@@ -29,7 +29,7 @@ namespace CakeMachine.Fabrication.Opérations
 
             try
             {
-                Thread.Sleep(_tempsEmballage);
+                AttenteIncompressible.Attendre(_tempsEmballage);
                 return new GâteauEmballé(gâteau, _rng.NextBoolean(1 - _defectRate));
             }
             finally
@@ -44,7 +44,7 @@ namespace CakeMachine.Fabrication.Opérations
 
             try
             {
-                await Task.Delay(_tempsEmballage);
+                await AttenteIncompressible.AttendreAsync(_tempsEmballage);
                 return new GâteauEmballé(gâteau, _rng.NextBoolean(1 - _defectRate));
             }
             finally
