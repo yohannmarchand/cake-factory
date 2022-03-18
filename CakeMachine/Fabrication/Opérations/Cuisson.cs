@@ -11,7 +11,7 @@ namespace CakeMachine.Fabrication.Opérations
         private readonly ushort _nombrePlaces;
         private readonly double _defectRate;
 
-        private readonly SemaphoreSlim _lock = new(1);
+        private readonly EngorgementProduction _lock = new(1);
 
         public Cuisson(ThreadSafeRandomNumberGenerator rng, ParamètresCuisson paramètres)
         {

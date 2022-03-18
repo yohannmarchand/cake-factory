@@ -10,7 +10,7 @@ namespace CakeMachine.Fabrication.Opérations
         private readonly ThreadSafeRandomNumberGenerator _rng;
         private readonly double _defectRate;
 
-        private readonly SemaphoreSlim _lock;
+        private readonly EngorgementProduction _lock;
         private TimeSpan TempsPréparation => _rng.NextDouble() * _tempsPréparation.Min + (_tempsPréparation.Max - _tempsPréparation.Min);
 
         public Préparation(ThreadSafeRandomNumberGenerator rng, ParamètresPréparation paramètres)
@@ -18,10 +18,10 @@ namespace CakeMachine.Fabrication.Opérations
             _tempsPréparation = (paramètres.TempsMin, paramètres.TempsMax);
             _rng = rng;
             _defectRate = paramètres.DefectRate;
-            _lock = new SemaphoreSlim(paramètres.NombrePlaces);
+            _lock = new EngorgementProduction(paramètres.NombrePlaces);
         }
 
-        public int PlacesRestantes => _lock.CurrentCount;
+        public int PlacesRestantes => _lock.PlacesRestantes;
 
         public GâteauCru Préparer(Plat plat)
         {

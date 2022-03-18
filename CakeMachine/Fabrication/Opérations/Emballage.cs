@@ -6,7 +6,7 @@ namespace CakeMachine.Fabrication.Opérations
 {
     internal class Emballage
     {
-        private readonly SemaphoreSlim _lock;
+        private readonly EngorgementProduction _lock;
         private readonly TimeSpan _tempsEmballage;
         private readonly ThreadSafeRandomNumberGenerator _rng;
         private readonly double _defectRate;
@@ -14,14 +14,14 @@ namespace CakeMachine.Fabrication.Opérations
         public Emballage(ThreadSafeRandomNumberGenerator rng, ParamètresEmballage paramètres)
         {
             var (nombrePlaces, defectRate, tempsEmballage) = paramètres;
-            _lock = new SemaphoreSlim(nombrePlaces);
+            _lock = new EngorgementProduction(nombrePlaces);
             _tempsEmballage = tempsEmballage;
             _defectRate = defectRate;
 
             _rng = rng;
         }
 
-        public int PlacesRestantes => _lock.CurrentCount;
+        public int PlacesRestantes => _lock.PlacesRestantes;
 
         public GâteauEmballé Emballer(GâteauCuit gâteau)
         {
