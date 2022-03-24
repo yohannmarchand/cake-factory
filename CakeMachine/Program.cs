@@ -1,4 +1,4 @@
-﻿using CakeMachine.Utils;
+﻿using CakeMachine.Simulation;
 
 const int nombreGâteaux = 100;
 
