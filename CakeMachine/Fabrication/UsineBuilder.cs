@@ -5,16 +5,19 @@ namespace CakeMachine.Fabrication
 {
     internal class UsineBuilder : IConfigurationUsine
     {
+        private const ushort MultiplicateurTemps = 1;
         private ParamètresUsine _paramètres;
         private readonly ThreadSafeRandomNumberGenerator _rng = new ();
 
         public UsineBuilder()
         {
             var paramètresPréparation =
-                new ParamètresPréparation(3, 0.05, TimeSpan.FromMilliseconds(5), TimeSpan.FromMilliseconds(8));
+                new ParamètresPréparation(3, 0.05, 
+                    MultiplicateurTemps * TimeSpan.FromMilliseconds(5),
+                    MultiplicateurTemps * TimeSpan.FromMilliseconds(8));
 
-            var paramètresCuisson = new ParamètresCuisson(5, 0.05, TimeSpan.FromMilliseconds(10));
-            var paramètresEmballage = new ParamètresEmballage(2, 0.05, TimeSpan.FromMilliseconds(2));
+            var paramètresCuisson = new ParamètresCuisson(5, 0.05, MultiplicateurTemps * TimeSpan.FromMilliseconds(10));
+            var paramètresEmballage = new ParamètresEmballage(2, 0.05, MultiplicateurTemps * TimeSpan.FromMilliseconds(2));
 
             _paramètres = new ParamètresUsine(1, 1, 1, paramètresPréparation, paramètresCuisson, paramètresEmballage);
         }
