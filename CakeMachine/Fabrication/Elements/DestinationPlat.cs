@@ -3,8 +3,10 @@
     internal enum DestinationPlat
     {
         Inconnu,
-        Conforme,
+        LivréConforme,
+        LivréNonConforme,
         Rebut,
+        RebutMaisConforme,
         Perdu,
         RéutiliséFrauduleusement
     }

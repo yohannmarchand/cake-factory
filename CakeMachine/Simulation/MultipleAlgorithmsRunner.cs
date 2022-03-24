@@ -5,61 +5,41 @@ namespace CakeMachine.Simulation
 {
     internal class MultipleAlgorithmsRunner
     {
-        private readonly IDictionary<Algorithme, SingleAlgorithmRunner> _runners;
+        private readonly IEnumerable<SingleAlgorithmRunner> _runners;
 
         public MultipleAlgorithmsRunner()
         {
             _runners = Assembly.GetExecutingAssembly().GetTypes()
                 .Where(type => type.BaseType == typeof(Algorithme))
-                .Select(Activator.CreateInstance)
-                .Cast<Algorithme>()
-                .ToDictionary(algorithm => algorithm, algorithm => new SingleAlgorithmRunner(algorithm));
+                .Select(algorithm => new SingleAlgorithmRunner(algorithm));
         }
 
         public async Task ProduirePendant(TimeSpan timeSpan)
         {
-            var résultats = _runners.Keys.ToDictionary(algorithme => algorithme, _ => new Dictionary<bool, uint>());
+            var résultats = new List<RésultatSimulation>();
 
-            foreach (var (algorithme, runner) in _runners)
+            foreach (var runner in _runners)
             {
                 var (sync, async) = await runner.ProduirePendant(timeSpan);
-                if (algorithme.SupportsAsync) résultats[algorithme][true] = async;
-                if (algorithme.SupportsSync) résultats[algorithme][false] = sync;
+                if (async is not null) résultats.Add(async);
+                if (sync is not null) résultats.Add(sync);
             }
 
-            foreach (var (algorithme, perfomances) in résultats)
-            {
-                if (perfomances.ContainsKey(false))
-                    Console.WriteLine(
-                        $"Avec l'algorithme {algorithme}[Sync], {perfomances[false]} gâteaux ont été produits en {timeSpan:g}");
-
-                if (perfomances.ContainsKey(true))
-                    Console.WriteLine(
-                        $"Avec l'algorithme {algorithme}[Async], {perfomances[true]} gâteaux ont été produits en {timeSpan:g}");
-            }
+            foreach (var résultat in résultats) Console.WriteLine(résultat);
         }
 
         public async Task ProduireNGâteaux(uint nombreGâteaux)
         {
-            var résultats = _runners.Keys.ToDictionary(algorithme => algorithme, _ => new Dictionary<bool, TimeSpan>());
+            var résultats = new List<RésultatSimulation>();
 
-            foreach (var (algorithme, runner) in _runners)
+            foreach (var runner in _runners)
             {
                 var (sync, async) = await runner.ProduireNGâteaux(nombreGâteaux);
-                if(algorithme.SupportsAsync) résultats[algorithme][true] = async;
-                if (algorithme.SupportsSync) résultats[algorithme][false] = sync;
+                if (async is not null) résultats.Add(async);
+                if (sync is not null) résultats.Add(sync);
             }
 
-            foreach (var (algorithme, perfomances) in résultats)
-            {
-                if (perfomances.ContainsKey(false))
-                    Console.WriteLine(
-                        $"Avec l'algorithme {algorithme}[Sync], {perfomances[false].TotalSeconds:F}s se sont écoulés pour produire {nombreGâteaux} gâteaux");
-
-                if (perfomances.ContainsKey(true))
-                    Console.WriteLine(
-                        $"Avec l'algorithme {algorithme}[Async], {perfomances[true].TotalSeconds:F}s se sont écoulés pour produire {nombreGâteaux} gâteaux");
-            }
+            foreach (var résultat in résultats) Console.WriteLine(résultat);
         }
     }
 }

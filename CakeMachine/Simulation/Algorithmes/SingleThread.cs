@@ -17,7 +17,7 @@ namespace CakeMachine.Simulation.Algorithmes
 
             while (!token.IsCancellationRequested)
             {
-                var plat = new Plat();
+                var plat = usine.StockInfiniPlats.First();
 
                 var gâteauCru = postePréparation.Préparer(plat);
                 var gâteauCuit = posteCuisson.Cuire(gâteauCru).Single();

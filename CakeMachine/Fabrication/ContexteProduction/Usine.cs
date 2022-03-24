@@ -52,9 +52,19 @@ namespace CakeMachine.Fabrication.ContexteProduction
             }
         }
 
-        public IReadOnlyDictionary<Plat, DestinationPlat> DestinationPlats(IEnumerable<GâteauEmballé> gâteauxEmballésReçus)
+        public IReadOnlyDictionary<DestinationPlat, uint> DestinationPlats(IEnumerable<GâteauEmballé> gâteauxEmballésReçus)
         {
-            var dictionary = new Dictionary<Plat, DestinationPlat>();
+            var dictionary = new Dictionary<DestinationPlat, uint>
+            {
+                { DestinationPlat.Inconnu, 0 },
+                { DestinationPlat.LivréConforme, 0 },
+                { DestinationPlat.LivréNonConforme, 0 },
+                { DestinationPlat.Rebut, 0 }, 
+                { DestinationPlat.RebutMaisConforme, 0 }, 
+                { DestinationPlat.Perdu, 0 }, 
+                { DestinationPlat.RéutiliséFrauduleusement, 0 }
+            };
+
             var platsCréés = new HashSet<Plat>(_platsCréés);
             var rebut = new HashSet<IConforme>(_rebut);
 
@@ -64,23 +74,23 @@ namespace CakeMachine.Fabrication.ContexteProduction
             foreach (var gâteauEmballé in gâteauxEmballésArray)
             {
                 if(!platsCréés.Contains(gâteauEmballé.PlatSousJacent)) 
-                    dictionary.Add(gâteauEmballé.PlatSousJacent, DestinationPlat.Inconnu);
-
-                if (!gâteauEmballé.EstConforme) 
-                    dictionary.Add(gâteauEmballé.PlatSousJacent, DestinationPlat.Rebut);
-
-                if(rebut.Contains(gâteauEmballé))
-                    dictionary.Add(gâteauEmballé.PlatSousJacent, DestinationPlat.RéutiliséFrauduleusement);
-
-                dictionary.Add(gâteauEmballé.PlatSousJacent, DestinationPlat.Conforme);
+                    dictionary[DestinationPlat.Inconnu] ++;
+                else if (!gâteauEmballé.EstConforme)
+                    dictionary[DestinationPlat.LivréNonConforme]++;
+                else if(rebut.Contains(gâteauEmballé))
+                    dictionary[DestinationPlat.RéutiliséFrauduleusement]++;
+                else dictionary[DestinationPlat.LivréConforme]++;
             }
 
             foreach (var platCréé in platsCréés.Where(platCréé => !platsArrivésEnBoutDeChaîne.Contains(platCréé)))
             {
-                if (rebut.Contains(platCréé))
-                    dictionary.Add(platCréé, DestinationPlat.Rebut);
-
-                dictionary.Add(platCréé, DestinationPlat.Perdu);
+                var élémentTrouvéAuRebut = rebut.SingleOrDefault(element => element.PlatSousJacent == platCréé.PlatSousJacent);
+                if (élémentTrouvéAuRebut != null)
+                {
+                    if (élémentTrouvéAuRebut.EstConforme) dictionary[DestinationPlat.RebutMaisConforme]++;
+                    else dictionary[DestinationPlat.Rebut]++;
+                }
+                else dictionary[DestinationPlat.Perdu]++;
             }
 
             return dictionary;
