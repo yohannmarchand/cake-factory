@@ -1,10 +1,11 @@
-﻿using CakeMachine.Fabrication;
+﻿using CakeMachine.Fabrication.ContexteProduction;
 using CakeMachine.Fabrication.Elements;
 using CakeMachine.Fabrication.Opérations;
+using CakeMachine.Utils;
 
-namespace CakeMachine.Simulation
+namespace CakeMachine.Simulation.Algorithmes
 {
-    internal class FourRempliSansRebus : Algorithme
+    internal class FourRempliSansRebut : Algorithme
     {
         /// <inheritdoc />
         public override bool SupportsSync => true;
@@ -19,10 +20,11 @@ namespace CakeMachine.Simulation
             while (!token.IsCancellationRequested)
             {
                 var gâteauxCrus = PréparerNConformes(postePréparation,
-                    usine.OrganisationUsine.ParamètresCuisson.NombrePlaces);
+                    usine.OrganisationUsine.ParamètresCuisson.NombrePlaces,
+                    usine.StockInfiniPlats, usine);
 
                 var gâteauxCuits = posteCuisson.Cuire(gâteauxCrus);
-                var gâteauxCuitsConformes = gâteauxCuits.Where(gâteau => gâteau.EstConforme);
+                var gâteauxCuitsConformes = gâteauxCuits.TrierRebut(usine);
                 
                 var gâteauxEmballés = gâteauxCuitsConformes
                     .Select(posteEmballage.Emballer)
@@ -33,17 +35,17 @@ namespace CakeMachine.Simulation
             }
         }
 
-        private static GâteauCru[] PréparerNConformes(Préparation postePréparation, ushort gâteaux)
+        private static GâteauCru[] PréparerNConformes(Préparation postePréparation, ushort gâteaux, IEnumerable<Plat> stockPlats, Usine usine)
         {
             var gâteauxConformes = new List<GâteauCru>(gâteaux);
 
             do
             {
-                var plats = Enumerable.Range(0, gâteaux - gâteauxConformes.Count)
-                    .Select(_ => new Plat());
+                // ReSharper disable once PossibleMultipleEnumeration
+                var plats = stockPlats.Take(gâteaux - gâteauxConformes.Count);
 
                 var gâteauxCrus = plats.Select(postePréparation.Préparer);
-                gâteauxConformes.AddRange(gâteauxCrus.Where(gâteau => gâteau.EstConforme));
+                gâteauxConformes.AddRange(gâteauxCrus.TrierRebut(usine));
             } while (gâteauxConformes.Count < gâteaux);
 
             return gâteauxConformes.ToArray();
