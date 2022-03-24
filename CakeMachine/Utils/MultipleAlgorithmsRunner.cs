@@ -89,12 +89,12 @@ namespace CakeMachine.Utils
 
                 if (algorithme.SupportsSync)
                 {
-                    stopWatch.Start();
-
                     var gâteauxConformes = 0;
 
                     var tokenSource = new CancellationTokenSource();
                     using var producteur = algorithme.Produire(usine, tokenSource.Token).GetEnumerator();
+                    
+                    stopWatch.Start();
 
                     while (gâteauxConformes < nombreGâteaux)
                     {
@@ -106,10 +106,9 @@ namespace CakeMachine.Utils
                         var gâteau = producteur.Current;
                         if (gâteau.EstConforme) gâteauxConformes++;
                     }
-                    
-                    tokenSource.Cancel();
 
                     stopWatch.Stop();
+                    tokenSource.Cancel();
 
                     résultats[algorithme][false] = stopWatch.Elapsed;
                     stopWatch.Reset();
@@ -117,14 +116,14 @@ namespace CakeMachine.Utils
 
                 if (algorithme.SupportsAsync)
                 {
-                    stopWatch.Start();
-
                     var gâteauxConformes = 0;
 
                     var tokenSource = new CancellationTokenSource();
                     await using var producteur = algorithme
                         .ProduireAsync(usine, tokenSource.Token)
                         .GetAsyncEnumerator(tokenSource.Token);
+
+                    stopWatch.Start();
 
                     while (gâteauxConformes < nombreGâteaux)
                     {
@@ -136,9 +135,8 @@ namespace CakeMachine.Utils
                         if (gâteau.EstConforme) gâteauxConformes++;
                     }
 
-                    tokenSource.Cancel();
-                    
                     stopWatch.Stop();
+                    tokenSource.Cancel();
 
                     résultats[algorithme][true] = stopWatch.Elapsed;
                     stopWatch.Reset();
