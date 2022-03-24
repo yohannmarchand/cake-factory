@@ -23,6 +23,7 @@ namespace CakeMachine.Test
         [InlineData(typeof(FourRempli))]
         [InlineData(typeof(FourRempliSansRebut))]
         [InlineData(typeof(AntiRebut))]
+        [InlineData(typeof(Optimisée1Poste))]
         public async Task TestAlgoOptimisé(Type algorithme)
         {
             var runner = new SingleAlgorithmRunner(algorithme);
