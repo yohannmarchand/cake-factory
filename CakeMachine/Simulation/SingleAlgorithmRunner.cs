@@ -19,11 +19,13 @@ namespace CakeMachine.Simulation
         {
         }
 
-        public async Task<(RésultatSimulation? Sync, RésultatSimulation? Async)> ProduirePendantAsync(TimeSpan timeSpan)
-            => await ProduireSyncEtAsync(tuple => tuple.TempsÉcoulé >= timeSpan);
+        private bool AlgorithmSupports(bool sync) => sync ? _algorithme.SupportsSync : _algorithme.SupportsAsync;
 
-        public async Task<(RésultatSimulation? Sync, RésultatSimulation? Async)> ProduireNGâteaux(uint nombreGâteaux)
-            => await ProduireSyncEtAsync(tuple => tuple.GâteauxValidesProduits >= nombreGâteaux);
+        public async Task<RésultatSimulation?> ProduirePendantAsync(TimeSpan timeSpan, bool syncAlgorithm)
+            => AlgorithmSupports(syncAlgorithm) ? await Produire(tuple => tuple.TempsÉcoulé >= timeSpan, syncAlgorithm) : null;
+
+        public async Task<RésultatSimulation?> ProduireNGâteauxAsync(uint nombreGâteaux, bool syncAlgorithm)
+            => AlgorithmSupports(syncAlgorithm) ? await Produire(tuple => tuple.GâteauxValidesProduits >= nombreGâteaux, syncAlgorithm) : null;
 
         private async Task<RésultatSimulation> Produire(
             Predicate<(TimeSpan TempsÉcoulé, uint GâteauxValidesProduits)> conditionSortie, bool sync)
@@ -95,17 +97,6 @@ namespace CakeMachine.Simulation
                                                     "recuire un gâteau mal cuit ou réemballer un gâteau mal emballé. C'est interdit.");
 
             return new RésultatSimulation(_algorithme, true, stopWatch.Elapsed, destinationPlats);
-        }
-
-        private async Task<(RésultatSimulation? Sync, RésultatSimulation? Async)> ProduireSyncEtAsync(
-            Predicate<(TimeSpan TempsÉcoulé, uint GâteauxValidesProduits)> conditionSortie)
-        {
-            (RésultatSimulation? Sync, RésultatSimulation? Async) résultats = (default, default);
-
-            if (_algorithme.SupportsSync) résultats.Sync = await Produire(conditionSortie, true);
-            if (_algorithme.SupportsAsync) résultats.Async = await Produire(conditionSortie, false);
-
-            return résultats;
         }
     }
 }

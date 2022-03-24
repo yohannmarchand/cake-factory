@@ -4,6 +4,7 @@ using CakeMachine.Simulation;
 using CakeMachine.Simulation.Algorithmes;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace CakeMachine.Test
 {
@@ -17,20 +18,26 @@ namespace CakeMachine.Test
         }
 
         [Theory]
-        [InlineData(typeof(SingleThread))]
-        [InlineData(typeof(DeuxParDeux))]
-        [InlineData(typeof(DixParDix))]
-        [InlineData(typeof(FourRempli))]
-        [InlineData(typeof(FourRempliSansRebut))]
-        [InlineData(typeof(AntiRebut))]
-        [InlineData(typeof(Optimisée1Poste))]
-        public async Task TestAlgoOptimisé(Type algorithme)
+        [InlineData(typeof(SingleThread), true)]
+        [InlineData(typeof(SingleThread), false)]
+        [InlineData(typeof(DeuxParDeux), true)]
+        [InlineData(typeof(DeuxParDeux), false)]
+        [InlineData(typeof(DixParDix), true)]
+        [InlineData(typeof(DixParDix), false)]
+        [InlineData(typeof(FourRempli), true)]
+        [InlineData(typeof(FourRempli), false)]
+        [InlineData(typeof(FourRempliSansRebut), true)]
+        [InlineData(typeof(FourRempliSansRebut), false)]
+        [InlineData(typeof(AntiRebut), true)]
+        [InlineData(typeof(AntiRebut), false)]
+        [InlineData(typeof(Optimisée1Poste), false)]
+        public async Task TestAlgoOptimisé(Type algorithme, bool sync)
         {
             var runner = new SingleAlgorithmRunner(algorithme);
-            var (sync, async) = await runner.ProduirePendantAsync(TimeSpan.FromSeconds(5));
+            var result = await runner.ProduirePendantAsync(TimeSpan.FromSeconds(5), sync);
             
-            if(sync is not null) _testOutputHelper.WriteLine(sync.ToString());
-            if (async is not null) _testOutputHelper.WriteLine(async.ToString());
+            if(result is null) throw new XunitException("No algorithm");
+            _testOutputHelper.WriteLine(result.ToString());
         }
     }
 }

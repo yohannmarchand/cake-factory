@@ -20,7 +20,9 @@ namespace CakeMachine.Simulation
 
             foreach (var runner in _runners)
             {
-                var (sync, async) = await runner.ProduirePendantAsync(timeSpan);
+                var sync = await runner.ProduirePendantAsync(timeSpan, true);
+                var async = await runner.ProduirePendantAsync(timeSpan, false);
+
                 if (async is not null) résultats.Add(async);
                 if (sync is not null) résultats.Add(sync);
             }
@@ -34,7 +36,9 @@ namespace CakeMachine.Simulation
 
             foreach (var runner in _runners)
             {
-                var (sync, async) = await runner.ProduireNGâteaux(nombreGâteaux);
+                var sync = await runner.ProduireNGâteauxAsync(nombreGâteaux, true);
+                var async = await runner.ProduireNGâteauxAsync(nombreGâteaux, false);
+
                 if (async is not null) résultats.Add(async);
                 if (sync is not null) résultats.Add(sync);
             }

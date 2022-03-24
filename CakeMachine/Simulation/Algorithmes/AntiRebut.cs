@@ -1,4 +1,5 @@
-﻿using CakeMachine.Fabrication.ContexteProduction;
+﻿using System.Runtime.CompilerServices;
+using CakeMachine.Fabrication.ContexteProduction;
 using CakeMachine.Fabrication.Elements;
 
 namespace CakeMachine.Simulation.Algorithmes
@@ -7,6 +8,9 @@ namespace CakeMachine.Simulation.Algorithmes
     {
         /// <inheritdoc />
         public override bool SupportsSync => true;
+
+        /// <inheritdoc />
+        public override bool SupportsAsync => true;
 
         /// <inheritdoc />
         public override IEnumerable<GâteauEmballé> Produire(Usine usine, CancellationToken token)
@@ -33,6 +37,43 @@ namespace CakeMachine.Simulation.Algorithmes
                 }
 
                 var gâteauEmballé = posteEmballage.Emballer(gâteauCuit);
+                if (!gâteauEmballé.EstConforme)
+                {
+                    usine.MettreAuRebut(gâteauEmballé);
+                    continue;
+                }
+
+                yield return gâteauEmballé;
+            }
+        }
+
+        /// <inheritdoc />
+        public override async IAsyncEnumerable<GâteauEmballé> ProduireAsync(
+            Usine usine,
+            [EnumeratorCancellation] CancellationToken token)
+        {
+            var postePréparation = usine.Préparateurs.Single();
+            var posteCuisson = usine.Fours.Single();
+            var posteEmballage = usine.Emballeuses.Single();
+
+            while (!token.IsCancellationRequested)
+            {
+                GâteauCru? gâteauCru = default;
+                do
+                {
+                    if (gâteauCru != default) usine.MettreAuRebut(gâteauCru);
+                    gâteauCru = await postePréparation.PréparerAsync(usine.StockInfiniPlats.First());
+                }
+                while (!gâteauCru.EstConforme);
+
+                var gâteauCuit = (await posteCuisson.CuireAsync(gâteauCru)).Single();
+                if (!gâteauCuit.EstConforme)
+                {
+                    usine.MettreAuRebut(gâteauCuit);
+                    continue;
+                }
+
+                var gâteauEmballé = await posteEmballage.EmballerAsync(gâteauCuit);
                 if (!gâteauEmballé.EstConforme)
                 {
                     usine.MettreAuRebut(gâteauEmballé);
