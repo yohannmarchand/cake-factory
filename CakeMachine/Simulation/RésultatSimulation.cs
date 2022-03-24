@@ -9,7 +9,20 @@ namespace CakeMachine.Simulation
         bool IsSync,
         TimeSpan Temps,
         IReadOnlyDictionary<DestinationPlat, uint> DestinationPlats)
+        : IComparable<RésultatSimulation>
     {
+        public int CompareTo(RésultatSimulation? other)
+        {
+            if (other is null) return -1;
+
+            var livrésConformes = DestinationPlats[DestinationPlat.LivréConforme];
+            var livrésConformesAutre = other.DestinationPlats[DestinationPlat.LivréConforme];
+
+            if (livrésConformesAutre != livrésConformes) return (int) (livrésConformesAutre - livrésConformes);
+
+            return Convert.ToInt32(Math.Round((other.Temps - Temps).TotalSeconds));
+        }
+
         /// <inheritdoc />
         public override string ToString()
         {

@@ -25,7 +25,7 @@ namespace CakeMachine.Simulation
                 if (sync is not null) résultats.Add(sync);
             }
 
-            foreach (var résultat in résultats) Console.WriteLine(résultat);
+            foreach (var résultat in résultats.OrderByDescending(r => r)) Console.WriteLine(résultat);
         }
 
         public async Task ProduireNGâteaux(uint nombreGâteaux)
@@ -39,7 +39,7 @@ namespace CakeMachine.Simulation
                 if (sync is not null) résultats.Add(sync);
             }
 
-            foreach (var résultat in résultats) Console.WriteLine(résultat);
+            foreach (var résultat in résultats.OrderByDescending(r => r)) Console.WriteLine(résultat);
         }
     }
 }
