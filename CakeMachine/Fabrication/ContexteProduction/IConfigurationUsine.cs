@@ -1,4 +1,4 @@
-﻿namespace CakeMachine.Fabrication
+﻿namespace CakeMachine.Fabrication.ContexteProduction
 {
     internal interface IConfigurationUsine
     {

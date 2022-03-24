@@ -10,7 +10,7 @@
         }
 
         /// <inheritdoc />
-        public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = new CancellationToken())
+        public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = new ())
             => new Enumerator<T>(_elements.Select(e => e.GetAsyncEnumerator(cancellationToken)).ToArray(), cancellationToken);
 
         private class Enumerator<T2> : IAsyncEnumerator<T2>
@@ -37,6 +37,8 @@
             /// <inheritdoc />
             public async ValueTask<bool> MoveNextAsync()
             {
+                _token.ThrowIfCancellationRequested();
+
                 var alreadyPulled = _enumerators.Where(e => e.Value).ToArray();
                 if(alreadyPulled.Any())
                 {

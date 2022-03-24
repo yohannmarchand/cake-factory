@@ -1,7 +1,7 @@
 ﻿using CakeMachine.Fabrication.Paramètres;
 using CakeMachine.Utils;
 
-namespace CakeMachine.Fabrication
+namespace CakeMachine.Fabrication.ContexteProduction
 {
     internal class UsineBuilder : IConfigurationUsine
     {
