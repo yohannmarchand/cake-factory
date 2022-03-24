@@ -13,6 +13,6 @@ namespace CakeMachine.Fabrication.ContexteProduction
         IEnumerable<Emballage> Emballeuses { get; }
 
         IEnumerable<Plat> StockInfiniPlats { get; }
-        void MettreAuRebut(IConforme conforme);
+        void MettreAuRebut(params IConforme[] conformes);
     }
 }

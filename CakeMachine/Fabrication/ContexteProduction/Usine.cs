@@ -97,9 +97,10 @@ namespace CakeMachine.Fabrication.ContexteProduction
         }
 
         /// <inheritdoc />
-        public void MettreAuRebut(IConforme conforme)
+        public void MettreAuRebut(params IConforme[] conformes)
         {
-            _rebut.Add(conforme);
+            foreach (var conforme in conformes)
+                _rebut.Add(conforme);
         }
     }
 }
