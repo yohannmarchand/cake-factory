@@ -19,7 +19,7 @@ namespace CakeMachine.Simulation
         {
         }
 
-        public async Task<(RésultatSimulation? Sync, RésultatSimulation? Async)> ProduirePendant(TimeSpan timeSpan)
+        public async Task<(RésultatSimulation? Sync, RésultatSimulation? Async)> ProduirePendantAsync(TimeSpan timeSpan)
             => await Produire(tuple => tuple.TempsÉcoulé >= timeSpan);
 
         public async Task<(RésultatSimulation? Sync, RésultatSimulation? Async)> ProduireNGâteaux(uint nombreGâteaux)

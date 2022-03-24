@@ -20,7 +20,7 @@ namespace CakeMachine.Simulation
 
             foreach (var runner in _runners)
             {
-                var (sync, async) = await runner.ProduirePendant(timeSpan);
+                var (sync, async) = await runner.ProduirePendantAsync(timeSpan);
                 if (async is not null) résultats.Add(async);
                 if (sync is not null) résultats.Add(sync);
             }
