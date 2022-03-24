@@ -1,7 +1,7 @@
 ﻿using CakeMachine.Fabrication.ContexteProduction;
 using CakeMachine.Fabrication.Elements;
 
-namespace CakeMachine.Simulation
+namespace CakeMachine.Simulation.Algorithmes
 {
     internal class SingleThread : Algorithme
     {
@@ -11,14 +11,18 @@ namespace CakeMachine.Simulation
         /// <inheritdoc />
         public override IEnumerable<GâteauEmballé> Produire(Usine usine, CancellationToken token)
         {
+            var postePréparation = usine.Préparateurs.Single();
+            var posteCuisson = usine.Fours.Single();
+            var posteEmballage = usine.Emballeuses.Single();
+
             while (!token.IsCancellationRequested)
             {
                 var plat = new Plat();
 
-                var gâteauCru = usine.Préparateurs.First().Préparer(plat);
-                var gâteauCuit = usine.Fours.First().Cuire(gâteauCru).Single();
-                var gâteauEmballé = usine.Emballeuses.First().Emballer(gâteauCuit);
-
+                var gâteauCru = postePréparation.Préparer(plat);
+                var gâteauCuit = posteCuisson.Cuire(gâteauCru).Single();
+                var gâteauEmballé = posteEmballage.Emballer(gâteauCuit);
+                
                 yield return gâteauEmballé;
             }
         }

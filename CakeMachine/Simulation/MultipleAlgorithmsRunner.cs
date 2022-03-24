@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using CakeMachine.Simulation.Algorithmes;
 
 namespace CakeMachine.Simulation
 {
@@ -22,8 +23,8 @@ namespace CakeMachine.Simulation
             foreach (var (algorithme, runner) in _runners)
             {
                 var (sync, async) = await runner.ProduirePendant(timeSpan);
-                résultats[algorithme][true] = async;
-                résultats[algorithme][false] = sync;
+                if (algorithme.SupportsAsync) résultats[algorithme][true] = async;
+                if (algorithme.SupportsSync) résultats[algorithme][false] = sync;
             }
 
             foreach (var (algorithme, perfomances) in résultats)
@@ -45,8 +46,8 @@ namespace CakeMachine.Simulation
             foreach (var (algorithme, runner) in _runners)
             {
                 var (sync, async) = await runner.ProduireNGâteaux(nombreGâteaux);
-                résultats[algorithme][true] = async;
-                résultats[algorithme][false] = sync;
+                if(algorithme.SupportsAsync) résultats[algorithme][true] = async;
+                if (algorithme.SupportsSync) résultats[algorithme][false] = sync;
             }
 
             foreach (var (algorithme, perfomances) in résultats)

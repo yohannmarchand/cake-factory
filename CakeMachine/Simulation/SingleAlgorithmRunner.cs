@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using CakeMachine.Fabrication.ContexteProduction;
+using CakeMachine.Simulation.Algorithmes;
 
 namespace CakeMachine.Simulation
 {

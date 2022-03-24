@@ -1,7 +1,7 @@
 ﻿using CakeMachine.Fabrication.ContexteProduction;
 using CakeMachine.Fabrication.Elements;
 
-namespace CakeMachine.Simulation
+namespace CakeMachine.Simulation.Algorithmes
 {
     internal abstract class Algorithme
     {
