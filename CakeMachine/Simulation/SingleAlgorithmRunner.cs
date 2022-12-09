@@ -9,7 +9,7 @@ namespace CakeMachine.Simulation
     {
         private readonly Algorithme _algorithme;
 
-        public SingleAlgorithmRunner(Algorithme algorithme)
+        private SingleAlgorithmRunner(Algorithme algorithme)
         {
             _algorithme = algorithme;
         }
@@ -22,10 +22,14 @@ namespace CakeMachine.Simulation
         private bool AlgorithmSupports(bool sync) => sync ? _algorithme.SupportsSync : _algorithme.SupportsAsync;
 
         public async Task<RésultatSimulation?> ProduirePendantAsync(TimeSpan timeSpan, bool syncAlgorithm)
-            => AlgorithmSupports(syncAlgorithm) ? await Produire(tuple => tuple.TempsÉcoulé >= timeSpan, syncAlgorithm) : null;
+            => AlgorithmSupports(syncAlgorithm) 
+                ? await Produire(tuple => tuple.TempsÉcoulé >= timeSpan, syncAlgorithm) 
+                : null;
 
         public async Task<RésultatSimulation?> ProduireNGâteauxAsync(uint nombreGâteaux, bool syncAlgorithm)
-            => AlgorithmSupports(syncAlgorithm) ? await Produire(tuple => tuple.GâteauxValidesProduits >= nombreGâteaux, syncAlgorithm) : null;
+            => AlgorithmSupports(syncAlgorithm) 
+                ? await Produire(tuple => tuple.GâteauxValidesProduits >= nombreGâteaux, syncAlgorithm) 
+                : null;
 
         private async Task<RésultatSimulation> Produire(
             Predicate<(TimeSpan TempsÉcoulé, uint GâteauxValidesProduits)> conditionSortie, bool sync)
@@ -41,13 +45,15 @@ namespace CakeMachine.Simulation
 
             var tokenSource = new CancellationTokenSource();
 
+            bool PeutContinuer() => !conditionSortie((stopWatch.Elapsed, gâteauxConformes));
+
             if(sync)
             {
                 using var producteur = _algorithme.Produire(usine, tokenSource.Token).GetEnumerator();
 
                 stopWatch.Start();
-
-                while (!conditionSortie((stopWatch.Elapsed, gâteauxConformes)))
+                
+                while (PeutContinuer())
                 {
                     if (!producteur.MoveNext())
                         throw new InvalidOperationException(
@@ -56,6 +62,7 @@ namespace CakeMachine.Simulation
                     Debug.Assert(producteur.Current != null, "producteur.Current != null");
                     var gâteau = producteur.Current;
 
+                    if (!PeutContinuer()) break;
                     gâteauxProduits.Add(producteur.Current);
                     if (gâteau.EstConforme) gâteauxConformes++;
                 }
@@ -68,7 +75,7 @@ namespace CakeMachine.Simulation
 
                 stopWatch.Start();
 
-                while (!conditionSortie((stopWatch.Elapsed, gâteauxConformes)))
+                while (PeutContinuer())
                 {
                     if (!await producteur.MoveNextAsync())
                         throw new InvalidOperationException(
@@ -76,6 +83,7 @@ namespace CakeMachine.Simulation
 
                     var gâteau = producteur.Current;
 
+                    if (!PeutContinuer()) break;
                     gâteauxProduits.Add(gâteau);
                     if (gâteau.EstConforme) gâteauxConformes++;
                 }
