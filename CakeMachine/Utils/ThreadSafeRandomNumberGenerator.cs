@@ -2,36 +2,15 @@
 
 internal class ThreadSafeRandomNumberGenerator
 {
-    private readonly Random _random;
-
-    public ThreadSafeRandomNumberGenerator()
-    {
-        _random = new Random();
-    }
-
-    private ThreadSafeRandomNumberGenerator(ThreadSafeRandomNumberGenerator parent)
-    {
-        lock (parent._random)
-        {
-            _random = new Random(parent._random.Next());
-        }
-    }
-
-    public ThreadSafeRandomNumberGenerator Fork() => new (this);
+    private static readonly Random Random = Random.Shared;
 
     public double NextDouble()
     {
-        lock (_random)
-        {
-            return _random.NextDouble();
-        }
+        return Random.NextDouble();
     }
 
     public bool NextBoolean(double chancesOfTrue)
     {
-        lock (_random)
-        {
-            return _random.NextDouble() < chancesOfTrue;
-        }
+        return Random.NextDouble() < chancesOfTrue;
     }
 }

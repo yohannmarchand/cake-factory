@@ -27,15 +27,15 @@ internal class Usine : IUsine
 
         Préparateurs = Enumerable
             .Range(0, organisationUsine.NombrePréparateurs)
-            .Select(_ => new Préparation(rng.Fork(), organisationUsine.ParamètresPréparation));
+            .Select(_ => new Préparation(rng, organisationUsine.ParamètresPréparation));
 
         Fours = Enumerable
             .Range(0, organisationUsine.NombreFours)
-            .Select(_ => new Cuisson(rng.Fork(), organisationUsine.ParamètresCuisson));
+            .Select(_ => new Cuisson(rng, organisationUsine.ParamètresCuisson));
 
         Emballeuses = Enumerable
             .Range(0, organisationUsine.NombreEmballeuses)
-            .Select(_ => new Emballage(rng.Fork(), organisationUsine.ParamètresEmballage));
+            .Select(_ => new Emballage(rng, organisationUsine.ParamètresEmballage));
     }
 
     public IEnumerable<Plat> StockInfiniPlats 
