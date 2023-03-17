@@ -40,11 +40,11 @@ namespace CakeMachine.Fabrication.Opérations
 
         public async Task<GâteauEmballé> EmballerAsync(GâteauCuit gâteau)
         {
-            await _lock.WaitAsync();
+            await _lock.WaitAsync().ConfigureAwait(false);
 
             try
             {
-                await AttenteIncompressible.AttendreAsync(_tempsEmballage);
+                await AttenteIncompressible.AttendreAsync(_tempsEmballage).ConfigureAwait(false);
                 return new GâteauEmballé(gâteau, _rng.NextBoolean(1 - _defectRate));
             }
             finally

@@ -34,9 +34,9 @@
                 _token.ThrowIfCancellationRequested();
                 if (!_tasks.Any()) return false;
 
-                var task = await Task.WhenAny(_tasks);
+                var task = await Task.WhenAny(_tasks).ConfigureAwait(false);
                 _tasks.Remove(task);
-                _current = await task;
+                _current = await task.ConfigureAwait(false);
 
                 return true;
             }

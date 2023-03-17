@@ -30,7 +30,7 @@
             {
                 foreach (var asyncEnumerator in _enumerators.Keys)
                 {
-                    await asyncEnumerator.DisposeAsync();
+                    await asyncEnumerator.DisposeAsync().ConfigureAwait(false);
                 }
             }
 
@@ -51,11 +51,11 @@
 
                 foreach (var enumerator in _enumerators.Keys)
                 {
-                    var hasNext = await enumerator.MoveNextAsync();
+                    var hasNext = await enumerator.MoveNextAsync().ConfigureAwait(false);
                     _enumerators[enumerator] = hasNext;
                 }
 
-                return _enumerators.Any(e => e.Value) && await MoveNextAsync();
+                return _enumerators.Any(e => e.Value) && await MoveNextAsync().ConfigureAwait(false);
             }
 
             /// <inheritdoc />

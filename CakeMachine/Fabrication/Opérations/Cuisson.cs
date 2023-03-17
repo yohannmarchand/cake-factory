@@ -51,12 +51,12 @@ namespace CakeMachine.Fabrication.Opérations
 
         public async Task<GâteauCuit[]> CuireAsync(params GâteauCru[] gâteaux)
         {
-            await _lock.WaitAsync();
+            await _lock.WaitAsync().ConfigureAwait(false);
 
             try
             {
                 VérifierNombreGâteaux(gâteaux);
-                await AttenteIncompressible.AttendreAsync(_tempsCuisson);
+                await AttenteIncompressible.AttendreAsync(_tempsCuisson).ConfigureAwait(false);
                 return Factory(gâteaux);
             }
             finally
