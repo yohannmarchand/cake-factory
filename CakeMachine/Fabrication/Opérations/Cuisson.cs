@@ -2,67 +2,66 @@
 using CakeMachine.Fabrication.Paramètres;
 using CakeMachine.Utils;
 
-namespace CakeMachine.Fabrication.Opérations
+namespace CakeMachine.Fabrication.Opérations;
+
+internal class Cuisson
 {
-    internal class Cuisson
+    private readonly ThreadSafeRandomNumberGenerator _rng;
+    private readonly TimeSpan _tempsCuisson;
+    private readonly ushort _nombrePlaces;
+    private readonly double _defectRate;
+
+    private readonly EngorgementProduction _lock = new(1);
+
+    public Cuisson(ThreadSafeRandomNumberGenerator rng, ParamètresCuisson paramètres)
     {
-        private readonly ThreadSafeRandomNumberGenerator _rng;
-        private readonly TimeSpan _tempsCuisson;
-        private readonly ushort _nombrePlaces;
-        private readonly double _defectRate;
+        _rng = rng;
 
-        private readonly EngorgementProduction _lock = new(1);
+        var (nombrePlaces, defectRate, tempsCuisson) = paramètres;
+        _tempsCuisson = tempsCuisson;
+        _nombrePlaces = nombrePlaces;
+        _defectRate = defectRate;
+    }
 
-        public Cuisson(ThreadSafeRandomNumberGenerator rng, ParamètresCuisson paramètres)
+    private void VérifierNombreGâteaux(IReadOnlyCollection<GâteauCru> gâteaux)
+    {
+        if (gâteaux.Count > _nombrePlaces)
+            throw new InvalidOperationException(
+                $"Le poste de Cuisson ne peut pas accepter plus de {_nombrePlaces} gâteaux en même temps.");
+    }
+
+    private GâteauCuit[] Factory(IEnumerable<GâteauCru> gâteaux)
+        => gâteaux.Select(gâteau => new GâteauCuit(gâteau, _rng.NextBoolean(1 - _defectRate))).ToArray();
+
+    public GâteauCuit[] Cuire(params GâteauCru[] gâteaux)
+    {
+        _lock.Wait();
+
+        try 
         {
-            _rng = rng;
-
-            var (nombrePlaces, defectRate, tempsCuisson) = paramètres;
-            _tempsCuisson = tempsCuisson;
-            _nombrePlaces = nombrePlaces;
-            _defectRate = defectRate;
+            VérifierNombreGâteaux(gâteaux);
+            AttenteIncompressible.Attendre(_tempsCuisson);
+            return Factory(gâteaux);
+        } 
+        finally
+        {
+            _lock.Release();
         }
+    }
 
-        private void VérifierNombreGâteaux(IReadOnlyCollection<GâteauCru> gâteaux)
+    public async Task<GâteauCuit[]> CuireAsync(params GâteauCru[] gâteaux)
+    {
+        await _lock.WaitAsync();
+
+        try
         {
-            if (gâteaux.Count > _nombrePlaces)
-                throw new InvalidOperationException(
-                    $"Le poste de Cuisson ne peut pas accepter plus de {_nombrePlaces} gâteaux en même temps.");
+            VérifierNombreGâteaux(gâteaux);
+            await AttenteIncompressible.AttendreAsync(_tempsCuisson);
+            return Factory(gâteaux);
         }
-
-        private GâteauCuit[] Factory(IEnumerable<GâteauCru> gâteaux)
-            => gâteaux.Select(gâteau => new GâteauCuit(gâteau, _rng.NextBoolean(1 - _defectRate))).ToArray();
-
-        public GâteauCuit[] Cuire(params GâteauCru[] gâteaux)
+        finally
         {
-            _lock.Wait();
-
-            try 
-            {
-                VérifierNombreGâteaux(gâteaux);
-                AttenteIncompressible.Attendre(_tempsCuisson);
-                return Factory(gâteaux);
-            } 
-            finally
-            {
-                _lock.Release();
-            }
-        }
-
-        public async Task<GâteauCuit[]> CuireAsync(params GâteauCru[] gâteaux)
-        {
-            await _lock.WaitAsync();
-
-            try
-            {
-                VérifierNombreGâteaux(gâteaux);
-                await AttenteIncompressible.AttendreAsync(_tempsCuisson);
-                return Factory(gâteaux);
-            }
-            finally
-            {
-                _lock.Release();
-            }
+            _lock.Release();
         }
     }
 }

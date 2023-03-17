@@ -2,55 +2,54 @@
 using CakeMachine.Fabrication.Paramètres;
 using CakeMachine.Utils;
 
-namespace CakeMachine.Fabrication.Opérations
+namespace CakeMachine.Fabrication.Opérations;
+
+internal class Préparation
 {
-    internal class Préparation
+    private readonly (TimeSpan Min, TimeSpan Max) _tempsPréparation;
+    private readonly ThreadSafeRandomNumberGenerator _rng;
+    private readonly double _defectRate;
+
+    private readonly EngorgementProduction _lock;
+    private TimeSpan TempsPréparation => _rng.NextDouble() * _tempsPréparation.Min + (_tempsPréparation.Max - _tempsPréparation.Min);
+
+    public Préparation(ThreadSafeRandomNumberGenerator rng, ParamètresPréparation paramètres)
     {
-        private readonly (TimeSpan Min, TimeSpan Max) _tempsPréparation;
-        private readonly ThreadSafeRandomNumberGenerator _rng;
-        private readonly double _defectRate;
+        _tempsPréparation = (paramètres.TempsMin, paramètres.TempsMax);
+        _rng = rng;
+        _defectRate = paramètres.DefectRate;
+        _lock = new EngorgementProduction(paramètres.NombrePlaces);
+    }
 
-        private readonly EngorgementProduction _lock;
-        private TimeSpan TempsPréparation => _rng.NextDouble() * _tempsPréparation.Min + (_tempsPréparation.Max - _tempsPréparation.Min);
+    public int PlacesRestantes => _lock.PlacesRestantes;
 
-        public Préparation(ThreadSafeRandomNumberGenerator rng, ParamètresPréparation paramètres)
+    public GâteauCru Préparer(Plat plat)
+    {
+        _lock.Wait();
+
+        try
         {
-            _tempsPréparation = (paramètres.TempsMin, paramètres.TempsMax);
-            _rng = rng;
-            _defectRate = paramètres.DefectRate;
-            _lock = new EngorgementProduction(paramètres.NombrePlaces);
+            AttenteIncompressible.Attendre(TempsPréparation);
+            return new GâteauCru(plat, _rng.NextBoolean(1 - _defectRate));
+        } 
+        finally
+        {
+            _lock.Release();
         }
+    }
 
-        public int PlacesRestantes => _lock.PlacesRestantes;
+    public async Task<GâteauCru> PréparerAsync(Plat plat)
+    {
+        await _lock.WaitAsync();
 
-        public GâteauCru Préparer(Plat plat)
+        try
         {
-            _lock.Wait();
-
-            try
-            {
-                AttenteIncompressible.Attendre(TempsPréparation);
-                return new GâteauCru(plat, _rng.NextBoolean(1 - _defectRate));
-            } 
-            finally
-            {
-                _lock.Release();
-            }
+            await AttenteIncompressible.AttendreAsync(TempsPréparation);
+            return new GâteauCru(plat, _rng.NextBoolean(1 - _defectRate));
         }
-
-        public async Task<GâteauCru> PréparerAsync(Plat plat)
+        finally
         {
-            await _lock.WaitAsync();
-
-            try
-            {
-                await AttenteIncompressible.AttendreAsync(TempsPréparation);
-                return new GâteauCru(plat, _rng.NextBoolean(1 - _defectRate));
-            }
-            finally
-            {
-                _lock.Release();
-            }
+            _lock.Release();
         }
     }
 }

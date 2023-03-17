@@ -1,8 +1,7 @@
-﻿namespace CakeMachine.Fabrication.Opérations
+﻿namespace CakeMachine.Fabrication.Opérations;
+
+internal static class AttenteIncompressible
 {
-    internal static class AttenteIncompressible
-    {
-        public static void Attendre(TimeSpan howLong) => Thread.Sleep(howLong);
-        public static async Task AttendreAsync(TimeSpan howLong) => await Task.Run(() => Thread.Sleep(howLong));
-    }
+    public static void Attendre(TimeSpan howLong) => Thread.Sleep(howLong);
+    public static async Task AttendreAsync(TimeSpan howLong) => await Task.Run(() => Thread.Sleep(howLong));
 }
