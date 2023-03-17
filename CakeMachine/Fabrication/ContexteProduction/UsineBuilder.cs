@@ -23,7 +23,7 @@ internal class UsineBuilder : IConfigurationUsine
     }
 
 
-    public Usine Build() => new (_rng.Fork(), _paramètres);
+    public Usine Build() => new (_rng, _paramètres);
 
     /// <inheritdoc />
     public ushort TailleMaxUsine => Usine.TailleMaxUsine;
