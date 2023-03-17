@@ -2,17 +2,16 @@
 using CakeMachine.Fabrication.Opérations;
 using CakeMachine.Fabrication.Paramètres;
 
-namespace CakeMachine.Fabrication.ContexteProduction
+namespace CakeMachine.Fabrication.ContexteProduction;
+
+internal interface IUsine
 {
-    internal interface IUsine
-    {
-        ParamètresUsine OrganisationUsine { get; }
+    ParamètresUsine OrganisationUsine { get; }
 
-        IEnumerable<Préparation> Préparateurs { get; }
-        IEnumerable<Cuisson> Fours { get; }
-        IEnumerable<Emballage> Emballeuses { get; }
+    IEnumerable<Préparation> Préparateurs { get; }
+    IEnumerable<Cuisson> Fours { get; }
+    IEnumerable<Emballage> Emballeuses { get; }
 
-        IEnumerable<Plat> StockInfiniPlats { get; }
-        void MettreAuRebut(params IConforme[] conformes);
-    }
+    IEnumerable<Plat> StockInfiniPlats { get; }
+    void MettreAuRebut(params IConforme[] conformes);
 }

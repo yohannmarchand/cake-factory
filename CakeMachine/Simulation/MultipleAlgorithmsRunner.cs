@@ -1,49 +1,48 @@
 ﻿using System.Reflection;
 using CakeMachine.Simulation.Algorithmes;
 
-namespace CakeMachine.Simulation
+namespace CakeMachine.Simulation;
+
+internal class MultipleAlgorithmsRunner
 {
-    internal class MultipleAlgorithmsRunner
+    private readonly IEnumerable<SingleAlgorithmRunner> _runners;
+
+    public MultipleAlgorithmsRunner()
     {
-        private readonly IEnumerable<SingleAlgorithmRunner> _runners;
+        _runners = Assembly.GetExecutingAssembly().GetTypes()
+            .Where(type => type.BaseType == typeof(Algorithme))
+            .Select(algorithm => new SingleAlgorithmRunner(algorithm));
+    }
 
-        public MultipleAlgorithmsRunner()
+    public async Task ProduirePendant(TimeSpan timeSpan)
+    {
+        var résultats = new List<RésultatSimulation>();
+
+        foreach (var runner in _runners)
         {
-            _runners = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(type => type.BaseType == typeof(Algorithme))
-                .Select(algorithm => new SingleAlgorithmRunner(algorithm));
+            var sync = await runner.ProduirePendantAsync(timeSpan, true).ConfigureAwait(false);
+            var async = await runner.ProduirePendantAsync(timeSpan, false).ConfigureAwait(false);
+
+            if (async is not null) résultats.Add(async);
+            if (sync is not null) résultats.Add(sync);
         }
 
-        public async Task ProduirePendant(TimeSpan timeSpan)
+        foreach (var résultat in résultats.OrderByDescending(r => r)) Console.WriteLine(résultat);
+    }
+
+    public async Task ProduireNGâteaux(uint nombreGâteaux)
+    {
+        var résultats = new List<RésultatSimulation>();
+
+        foreach (var runner in _runners)
         {
-            var résultats = new List<RésultatSimulation>();
+            var sync = await runner.ProduireNGâteauxAsync(nombreGâteaux, true).ConfigureAwait(false);
+            var async = await runner.ProduireNGâteauxAsync(nombreGâteaux, false).ConfigureAwait(false);
 
-            foreach (var runner in _runners)
-            {
-                var sync = await runner.ProduirePendantAsync(timeSpan, true).ConfigureAwait(false);
-                var async = await runner.ProduirePendantAsync(timeSpan, false).ConfigureAwait(false);
-
-                if (async is not null) résultats.Add(async);
-                if (sync is not null) résultats.Add(sync);
-            }
-
-            foreach (var résultat in résultats.OrderByDescending(r => r)) Console.WriteLine(résultat);
+            if (async is not null) résultats.Add(async);
+            if (sync is not null) résultats.Add(sync);
         }
 
-        public async Task ProduireNGâteaux(uint nombreGâteaux)
-        {
-            var résultats = new List<RésultatSimulation>();
-
-            foreach (var runner in _runners)
-            {
-                var sync = await runner.ProduireNGâteauxAsync(nombreGâteaux, true).ConfigureAwait(false);
-                var async = await runner.ProduireNGâteauxAsync(nombreGâteaux, false).ConfigureAwait(false);
-
-                if (async is not null) résultats.Add(async);
-                if (sync is not null) résultats.Add(sync);
-            }
-
-            foreach (var résultat in résultats.OrderByDescending(r => r)) Console.WriteLine(résultat);
-        }
+        foreach (var résultat in résultats.OrderByDescending(r => r)) Console.WriteLine(résultat);
     }
 }

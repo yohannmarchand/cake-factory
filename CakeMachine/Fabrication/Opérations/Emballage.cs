@@ -2,55 +2,54 @@
 using CakeMachine.Fabrication.Paramètres;
 using CakeMachine.Utils;
 
-namespace CakeMachine.Fabrication.Opérations
+namespace CakeMachine.Fabrication.Opérations;
+
+internal class Emballage
 {
-    internal class Emballage
+    private readonly EngorgementProduction _lock;
+    private readonly TimeSpan _tempsEmballage;
+    private readonly ThreadSafeRandomNumberGenerator _rng;
+    private readonly double _defectRate;
+
+    public Emballage(ThreadSafeRandomNumberGenerator rng, ParamètresEmballage paramètres)
     {
-        private readonly EngorgementProduction _lock;
-        private readonly TimeSpan _tempsEmballage;
-        private readonly ThreadSafeRandomNumberGenerator _rng;
-        private readonly double _defectRate;
+        var (nombrePlaces, defectRate, tempsEmballage) = paramètres;
+        _lock = new EngorgementProduction(nombrePlaces);
+        _tempsEmballage = tempsEmballage;
+        _defectRate = defectRate;
 
-        public Emballage(ThreadSafeRandomNumberGenerator rng, ParamètresEmballage paramètres)
+        _rng = rng;
+    }
+
+    public int PlacesRestantes => _lock.PlacesRestantes;
+
+    public GâteauEmballé Emballer(GâteauCuit gâteau)
+    {
+        _lock.Wait();
+
+        try
         {
-            var (nombrePlaces, defectRate, tempsEmballage) = paramètres;
-            _lock = new EngorgementProduction(nombrePlaces);
-            _tempsEmballage = tempsEmballage;
-            _defectRate = defectRate;
-
-            _rng = rng;
+            AttenteIncompressible.Attendre(_tempsEmballage);
+            return new GâteauEmballé(gâteau, _rng.NextBoolean(1 - _defectRate));
         }
-
-        public int PlacesRestantes => _lock.PlacesRestantes;
-
-        public GâteauEmballé Emballer(GâteauCuit gâteau)
+        finally
         {
-            _lock.Wait();
-
-            try
-            {
-                AttenteIncompressible.Attendre(_tempsEmballage);
-                return new GâteauEmballé(gâteau, _rng.NextBoolean(1 - _defectRate));
-            }
-            finally
-            {
-                _lock.Release();
-            }
+            _lock.Release();
         }
+    }
 
-        public async Task<GâteauEmballé> EmballerAsync(GâteauCuit gâteau)
+    public async Task<GâteauEmballé> EmballerAsync(GâteauCuit gâteau)
+    {
+        await _lock.WaitAsync().ConfigureAwait(false);
+
+        try
         {
-            await _lock.WaitAsync().ConfigureAwait(false);
-
-            try
-            {
-                await AttenteIncompressible.AttendreAsync(_tempsEmballage).ConfigureAwait(false);
-                return new GâteauEmballé(gâteau, _rng.NextBoolean(1 - _defectRate));
-            }
-            finally
-            {
-                _lock.Release();
-            }
+            await AttenteIncompressible.AttendreAsync(_tempsEmballage).ConfigureAwait(false);
+            return new GâteauEmballé(gâteau, _rng.NextBoolean(1 - _defectRate));
+        }
+        finally
+        {
+            _lock.Release();
         }
     }
 }

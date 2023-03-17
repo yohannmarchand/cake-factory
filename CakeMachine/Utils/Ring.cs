@@ -1,24 +1,23 @@
-﻿namespace CakeMachine.Utils
+﻿namespace CakeMachine.Utils;
+
+internal class Ring<T>
 {
-    internal class Ring<T>
+    private readonly Queue<T> _elements;
+
+    public Ring(IEnumerable<T> elements)
     {
-        private readonly Queue<T> _elements;
+        _elements = new Queue<T>(elements);
+    }
 
-        public Ring(IEnumerable<T> elements)
+    public T Next
+    {
+        get
         {
-            _elements = new Queue<T>(elements);
-        }
-
-        public T Next
-        {
-            get
+            lock(_elements)
             {
-                lock(_elements)
-                {
-                    var element = _elements.Dequeue();
-                    _elements.Enqueue(element);
-                    return element;
-                }
+                var element = _elements.Dequeue();
+                _elements.Enqueue(element);
+                return element;
             }
         }
     }
