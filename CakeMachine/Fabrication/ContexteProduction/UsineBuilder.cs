@@ -1,4 +1,4 @@
-﻿using CakeMachine.Fabrication.Paramètres;
+using CakeMachine.Fabrication.Paramètres;
 using CakeMachine.Utils;
 
 namespace CakeMachine.Fabrication.ContexteProduction
@@ -21,9 +21,8 @@ namespace CakeMachine.Fabrication.ContexteProduction
 
             _paramètres = new ParamètresUsine(1, 1, 1, paramètresPréparation, paramètresCuisson, paramètresEmballage);
         }
-
-
-        public Usine Build() => new (_rng.Fork(), _paramètres);
+        
+        public Usine Build() => new (_rng, _paramètres);
 
         /// <inheritdoc />
         public ushort TailleMaxUsine => Usine.TailleMaxUsine;

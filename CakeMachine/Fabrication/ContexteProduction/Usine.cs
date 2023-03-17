@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using CakeMachine.Fabrication.Elements;
 using CakeMachine.Fabrication.Opérations;
 using CakeMachine.Fabrication.Paramètres;
@@ -25,18 +25,18 @@ namespace CakeMachine.Fabrication.ContexteProduction
                     $"L'usine est pleine, elle peut compter au maximum {TailleMaxUsine} machines");
             OrganisationUsine = organisationUsine;
 
-            Préparateurs = Enumerable
-                .Range(0, organisationUsine.NombrePréparateurs)
-                .Select(_ => new Préparation(rng.Fork(), organisationUsine.ParamètresPréparation));
+        Préparateurs = Enumerable
+            .Range(0, organisationUsine.NombrePréparateurs)
+            .Select(_ => new Préparation(rng, organisationUsine.ParamètresPréparation));
 
-            Fours = Enumerable
-                .Range(0, organisationUsine.NombreFours)
-                .Select(_ => new Cuisson(rng.Fork(), organisationUsine.ParamètresCuisson));
+        Fours = Enumerable
+            .Range(0, organisationUsine.NombreFours)
+            .Select(_ => new Cuisson(rng, organisationUsine.ParamètresCuisson));
 
-            Emballeuses = Enumerable
-                .Range(0, organisationUsine.NombreEmballeuses)
-                .Select(_ => new Emballage(rng.Fork(), organisationUsine.ParamètresEmballage));
-        }
+        Emballeuses = Enumerable
+            .Range(0, organisationUsine.NombreEmballeuses)
+            .Select(_ => new Emballage(rng, organisationUsine.ParamètresEmballage));
+    }
 
         public IEnumerable<Plat> StockInfiniPlats 
         { 
