@@ -34,9 +34,9 @@ internal class EnumerateCompletedTasks<T> : IAsyncEnumerable<T>
             _token.ThrowIfCancellationRequested();
             if (!_tasks.Any()) return false;
 
-            var task = await Task.WhenAny(_tasks).ConfigureAwait(false);
+            var task = await Task.WhenAny(_tasks);
             _tasks.Remove(task);
-            _current = await task.ConfigureAwait(false);
+            _current = await task;
 
             return true;
         }

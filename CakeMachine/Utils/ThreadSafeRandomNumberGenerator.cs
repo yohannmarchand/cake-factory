@@ -1,16 +1,37 @@
-namespace CakeMachine.Utils;
+﻿namespace CakeMachine.Utils;
 
 internal class ThreadSafeRandomNumberGenerator
 {
-    private static readonly Random Random = Random.Shared;
+    private readonly Random _random;
+
+    public ThreadSafeRandomNumberGenerator()
+    {
+        _random = new Random();
+    }
+
+    private ThreadSafeRandomNumberGenerator(ThreadSafeRandomNumberGenerator parent)
+    {
+        lock (parent._random)
+        {
+            _random = new Random(parent._random.Next());
+        }
+    }
+
+    public ThreadSafeRandomNumberGenerator Fork() => new (this);
 
     public double NextDouble()
     {
-        return Random.NextDouble();
+        lock (_random)
+        {
+            return _random.NextDouble();
+        }
     }
 
     public bool NextBoolean(double chancesOfTrue)
     {
-        return Random.NextDouble() < chancesOfTrue;
+        lock (_random)
+        {
+            return _random.NextDouble() < chancesOfTrue;
+        }
     }
 }

@@ -30,7 +30,7 @@ internal class ConcatAsyncEnumerable<T> : IAsyncEnumerable<T>
         {
             foreach (var asyncEnumerator in _enumerators.Keys)
             {
-                await asyncEnumerator.DisposeAsync().ConfigureAwait(false);
+                await asyncEnumerator.DisposeAsync();
             }
         }
 
@@ -51,11 +51,11 @@ internal class ConcatAsyncEnumerable<T> : IAsyncEnumerable<T>
 
             foreach (var enumerator in _enumerators.Keys)
             {
-                var hasNext = await enumerator.MoveNextAsync().ConfigureAwait(false);
+                var hasNext = await enumerator.MoveNextAsync();
                 _enumerators[enumerator] = hasNext;
             }
 
-            return _enumerators.Any(e => e.Value) && await MoveNextAsync().ConfigureAwait(false);
+            return _enumerators.Any(e => e.Value) && await MoveNextAsync();
         }
 
         /// <inheritdoc />

@@ -40,11 +40,11 @@ internal class Préparation
 
     public async Task<GâteauCru> PréparerAsync(Plat plat)
     {
-        await _lock.WaitAsync().ConfigureAwait(false);
+        await _lock.WaitAsync();
 
         try
         {
-            await AttenteIncompressible.AttendreAsync(TempsPréparation).ConfigureAwait(false);
+            await AttenteIncompressible.AttendreAsync(TempsPréparation);
             return new GâteauCru(plat, _rng.NextBoolean(1 - _defectRate));
         }
         finally

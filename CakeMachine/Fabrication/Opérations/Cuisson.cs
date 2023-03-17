@@ -51,12 +51,12 @@ internal class Cuisson
 
     public async Task<GâteauCuit[]> CuireAsync(params GâteauCru[] gâteaux)
     {
-        await _lock.WaitAsync().ConfigureAwait(false);
+        await _lock.WaitAsync();
 
         try
         {
             VérifierNombreGâteaux(gâteaux);
-            await AttenteIncompressible.AttendreAsync(_tempsCuisson).ConfigureAwait(false);
+            await AttenteIncompressible.AttendreAsync(_tempsCuisson);
             return Factory(gâteaux);
         }
         finally
