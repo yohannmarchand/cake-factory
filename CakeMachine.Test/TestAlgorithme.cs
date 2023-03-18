@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using CakeMachine.Simulation;
 using CakeMachine.Simulation.Algorithmes;
@@ -6,62 +9,44 @@ using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace CakeMachine.Test;
-
-public class TestAlgorithme
+namespace CakeMachine.Test
 {
-    private readonly ITestOutputHelper _testOutputHelper;
-
-    public TestAlgorithme(ITestOutputHelper testOutputHelper)
+    public class TestAlgorithme
     {
-        _testOutputHelper = testOutputHelper;
-    }
+        private readonly ITestOutputHelper _testOutputHelper;
 
-    [Theory]
-    [InlineData(typeof(SingleThread), true)]
-    [InlineData(typeof(SingleThread), false)]
-    [InlineData(typeof(DeuxParDeux), true)]
-    [InlineData(typeof(DeuxParDeux), false)]
-    [InlineData(typeof(DixParDix), true)]
-    [InlineData(typeof(DixParDix), false)]
-    [InlineData(typeof(FourRempli), true)]
-    [InlineData(typeof(FourRempli), false)]
-    [InlineData(typeof(FourRempliSansRebut), true)]
-    [InlineData(typeof(FourRempliSansRebut), false)]
-    [InlineData(typeof(AntiRebut), true)]
-    [InlineData(typeof(AntiRebut), false)]
-    [InlineData(typeof(Optimisée1Poste), false)]
-    [InlineData(typeof(UsineEtalon), false)]
-    public async Task TestNombreGâteauxEn5Secondes(Type algorithme, bool sync)
-    {
-        var runner = new SingleAlgorithmRunner(algorithme);
-        var result = await runner.ProduirePendantAsync(TimeSpan.FromSeconds(5), sync);
+        public TestAlgorithme(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+        }
+
+        private static IEnumerable<Type> Algorithmes
+            => Assembly.GetAssembly(typeof(Algorithme))!
+                .GetTypes()
+                .Where(type => type.BaseType == typeof(Algorithme));
+
+        public static IEnumerable<object[]> CasTest => new CartesianData(Algorithmes, new [] { /*true,*/ false });
+
+        [Theory]
+        [MemberData(nameof(CasTest))]
+        public async Task TestNombreGâteauxEn5Secondes(Type algorithme, bool sync)
+        {
+            var runner = new SingleAlgorithmRunner(algorithme);
+            var result = await runner.ProduirePendantAsync(TimeSpan.FromSeconds(5), sync);
             
-        if(result is null) throw new XunitException("No algorithm");
-        _testOutputHelper.WriteLine(result.ToString());
-    }
+            if(result is null) throw new XunitException("No algorithm");
+            _testOutputHelper.WriteLine(result.ToString());
+        }
 
-    [Theory]
-    [InlineData(typeof(SingleThread), true)]
-    [InlineData(typeof(SingleThread), false)]
-    [InlineData(typeof(DeuxParDeux), true)]
-    [InlineData(typeof(DeuxParDeux), false)]
-    [InlineData(typeof(DixParDix), true)]
-    [InlineData(typeof(DixParDix), false)]
-    [InlineData(typeof(FourRempli), true)]
-    [InlineData(typeof(FourRempli), false)]
-    [InlineData(typeof(FourRempliSansRebut), true)]
-    [InlineData(typeof(FourRempliSansRebut), false)]
-    [InlineData(typeof(AntiRebut), true)]
-    [InlineData(typeof(AntiRebut), false)]
-    [InlineData(typeof(Optimisée1Poste), false)]
-    [InlineData(typeof(UsineEtalon), false)]
-    public async Task TestTempsPour100Gateaux(Type algorithme, bool sync)
-    {
-        var runner = new SingleAlgorithmRunner(algorithme);
-        var result = await runner.ProduireNGâteauxAsync(100, sync);
+        [Theory]
+        [MemberData(nameof(CasTest))]
+        public async Task TestTempsPour100Gateaux(Type algorithme, bool sync)
+        {
+            var runner = new SingleAlgorithmRunner(algorithme);
+            var result = await runner.ProduireNGâteauxAsync(100, sync);
 
-        if (result is null) throw new XunitException("No algorithm");
-        _testOutputHelper.WriteLine(result.ToString());
+            if (result is null) throw new XunitException("No algorithm");
+            _testOutputHelper.WriteLine(result.ToString());
+        }
     }
 }
